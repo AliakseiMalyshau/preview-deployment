@@ -21,6 +21,7 @@ jobs:
       GCP_REGION: ${{ vars.GCP_REGION }}
       GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_AR_NAME: ${{ vars.GCP_AR_NAME }}
 
     steps:
       - name: Check out repository
@@ -46,12 +47,17 @@ jobs:
 
       - name: Fetch
         run: |
+          CALCULATED_REPOSITORY_NAME=${{ github.event.repository.name }}
           CALCULATED_REPOSITORY_FULL_NAME=$(echo ${{ github.event.pull_request.head.repo.full_name }} | tr '[:upper:]' '[:lower:]')
+          CALCULATED_REPOSITORY_FULL_NAME_HYPHENATED=${CALCULATED_REPOSITORY_FULL_NAME////-}
+          CALCULATED_REPOSITORY_PR_NUMBER=${{ github.event.number }}
           CALCULATED_REPOSITORY_SHORT_SHA=$(git rev-parse --short ${{ github.sha }})
-          echo "REPOSITORY_NAME: ${{ github.event.repository.name }}"
+          CALCULATED_CLOUD_RUN_SERVICE_NAME=preview-$CALCULATED_REPOSITORY_FULL_NAME_HYPHENATED-pr$CALCULATED_REPOSITORY_PR_NUMBER-$CALCULATED_REPOSITORY_SHORT_SHA
+          echo "REPOSITORY_NAME: $CALCULATED_REPOSITORY_NAME"
           echo "REPOSITORY_FULL_NAME: $CALCULATED_REPOSITORY_FULL_NAME"
-          echo "REPOSITORY_PR_NUMBER: ${{ github.event.number }}"
+          echo "REPOSITORY_PR_NUMBER: $CALCULATED_REPOSITORY_PR_NUMBER"
           echo "REPOSITORY_COMMIT_SHA: $CALCULATED_REPOSITORY_SHORT_SHA"
+          echo "CLOUD_RUN_SERVICE_NAME: $CALCULATED_CLOUD_RUN_SERVICE_NAME"
 
       # - name: Build & Push
       #   uses: docker/build-push-action@v5
