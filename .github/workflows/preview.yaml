@@ -46,10 +46,12 @@ jobs:
 
       - name: Fetch
         run: |
+          CALCULATED_REPOSITORY_FULL_NAME=$(${{ github.event.pull_request.head.repo.full_name }} | tr '[:upper:]' '[:lower:]')
+          CALCULATED_REPOSITORY_SHORT_SHA=$(git rev-parse --short ${{ github.sha }})
           echo "REPOSITORY_NAME: ${{ github.event.repository.name }}
-          echo "REPOSITORY_FULL_NAME: $(${{ github.event.pull_request.head.repo.full_name }} | tr '[:upper:]' '[:lower:]')"
+          echo "REPOSITORY_FULL_NAME: $CALCULATED_REPOSITORY_FULL_NAME"
           echo "REPOSITORY_PR_NUMBER: ${{ github.event.number }}"
-          echo "REPOSITORY_COMMIT_SHA: $(git rev-parse --short ${{ github.sha }})"
+          echo "REPOSITORY_COMMIT_SHA: $CALCULATED_REPOSITORY_SHORT_SHA"
 
       # - name: Build & Push
       #   uses: docker/build-push-action@v5
