@@ -59,19 +59,17 @@ jobs:
           echo "REPOSITORY_COMMIT_SHA: $CALCULATED_REPOSITORY_SHORT_SHA"
           echo "CLOUD_RUN_SERVICE_NAME: $CALCULATED_CLOUD_RUN_SERVICE_NAME"
 
-      # - name: Build & Push
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     push: true
-      #     tags: |
-      #       ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }}
+      - name: Build & Push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: |
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }}
 
-      # - name: Run
-      #   run: |
-      #     gcloud run deploy preview-${{ env.REPOSITORY_NAME }}-pr${{ env.REPOSITORY_PR_NUMBER }}-${{ env.REPOSITORY_COMMIT_SHA }} \
-      #         --region ${{ env.GCP_REGION }} \
-      #         --project ${{ env.GCP_PROJECT_ID }} \
-      #         --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }} \
-      #         --port=8000 \
-      #         --ingress=all \
-      #         --allow-unauthenticated
+      - name: Run
+        run: |
+          gcloud run deploy preview-${{ env.REPOSITORY_NAME }}-pr${{ env.REPOSITORY_PR_NUMBER }}-${{ env.REPOSITORY_COMMIT_SHA }} \
+              --region ${{ env.GCP_REGION }} \
+              --project ${{ env.GCP_PROJECT_ID }} \
+              --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }} \
+              ${{ env.GCP_CLOUD_RUN_SERVICE_ARGS }}
