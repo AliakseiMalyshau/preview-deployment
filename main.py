@@ -22,4 +22,4 @@ def read_health():
 
 @app.get("/api/v1/me")
 def read_me():
-    return {"message": "It's me, again!"}
+    return {"message": "It's me!"}
