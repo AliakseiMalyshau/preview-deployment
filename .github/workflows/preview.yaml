@@ -3,8 +3,6 @@ name: Preview [SETUP]
 
 on:
   pull_request:
-    types:
-      - opened
     branches:
       - qa
 
