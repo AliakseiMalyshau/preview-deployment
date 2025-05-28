@@ -22,6 +22,7 @@ jobs:
       GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_AR_NAME: ${{ vars.GCP_AR_NAME }}
+      GCP_CLOUD_RUN_SERVICE_ARGS: ${{ vars.GCP_CLOUD_RUN_SERVICE_ARGS }}
 
     steps:
       - name: Check out repository
