@@ -3,15 +3,27 @@ name: Preview [SETUP]
 
 on:
   pull_request:
-    types:
-      - opened
     branches:
       - qa
 
 jobs:
   preview:
     name: Preview
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_AR_NAME: ${{ vars.GCP_AR_NAME }}
+      GCP_CLOUD_RUN_SERVICE_ARGS: ${{ vars.GCP_CLOUD_RUN_SERVICE_ARGS }}
+
     steps:
       - name: Check out repository
         id: checkout
@@ -36,24 +48,29 @@ jobs:
 
       - name: Fetch
         run: |
-          echo "REPOSITORY_NAME: ${{ github.event.repository.name }}
-          echo "REPOSITORY_FULL_NAME: $(${{ github.event.pull_request.head.repo.full_name }} | tr '[:upper:]' '[:lower:]')"
-          echo "REPOSITORY_PR_NUMBER: ${{ github.event.number }}"
-          echo "REPOSITORY_COMMIT_SHA: $(git rev-parse --short ${{ github.sha }})"
+          CALCULATED_REPOSITORY_NAME=${{ github.event.repository.name }}
+          CALCULATED_REPOSITORY_FULL_NAME=$(echo ${{ github.event.pull_request.head.repo.full_name }} | tr '[:upper:]' '[:lower:]')
+          CALCULATED_REPOSITORY_FULL_NAME_HYPHENATED=${CALCULATED_REPOSITORY_FULL_NAME////-}
+          CALCULATED_REPOSITORY_PR_NUMBER=${{ github.event.number }}
+          CALCULATED_REPOSITORY_SHORT_SHA=$(git rev-parse --short ${{ github.sha }})
+          CALCULATED_CLOUD_RUN_SERVICE_NAME=preview-$CALCULATED_REPOSITORY_FULL_NAME_HYPHENATED-pr$CALCULATED_REPOSITORY_PR_NUMBER-$CALCULATED_REPOSITORY_SHORT_SHA
+          echo "REPOSITORY_NAME=$CALCULATED_REPOSITORY_NAME" >> $GITHUB_ENV
+          echo "REPOSITORY_FULL_NAME=$CALCULATED_REPOSITORY_FULL_NAME" >> $GITHUB_ENV
+          echo "REPOSITORY_PR_NUMBER=$CALCULATED_REPOSITORY_PR_NUMBER" >> $GITHUB_ENV
+          echo "REPOSITORY_COMMIT_SHA=$CALCULATED_REPOSITORY_SHORT_SHA" >> $GITHUB_ENV
+          echo "CLOUD_RUN_SERVICE_NAME=$CALCULATED_CLOUD_RUN_SERVICE_NAME" >> $GITHUB_ENV
 
-      # - name: Build & Push
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     push: true
-      #     tags: |
-      #       ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }}
+      - name: Build & Push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: |
+            ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }}
 
-      # - name: Run
-      #   run: |
-      #     gcloud run deploy preview-${{ env.REPOSITORY_NAME }}-pr${{ env.REPOSITORY_PR_NUMBER }}-${{ env.REPOSITORY_COMMIT_SHA }} \
-      #         --region ${{ env.GCP_REGION }} \
-      #         --project ${{ env.GCP_PROJECT_ID }} \
-      #         --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }} \
-      #         --port=8000 \
-      #         --ingress=all \
-      #         --allow-unauthenticated
+      - name: Run
+        run: |
+          gcloud run deploy ${{ env.CLOUD_RUN_SERVICE_NAME }} \
+              --region ${{ env.GCP_REGION }} \
+              --project ${{ env.GCP_PROJECT_ID }} \
+              --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }} \
+              ${{ env.GCP_CLOUD_RUN_SERVICE_ARGS }}

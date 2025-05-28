@@ -18,3 +18,8 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.get("/api/v1/health")
 def read_health():
     return {"status": "healthy"}
+
+
+@app.get("/api/v1/me")
+def read_me():
+    return {"message": "It's me!"}
