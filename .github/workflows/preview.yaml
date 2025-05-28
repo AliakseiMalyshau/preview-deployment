@@ -69,7 +69,7 @@ jobs:
 
       - name: Run
         run: |
-          gcloud run deploy preview-${{ env.CLOUD_RUN_SERVICE_NAME }}-pr${{ env.REPOSITORY_PR_NUMBER }}-${{ env.REPOSITORY_COMMIT_SHA }} \
+          gcloud run deploy ${{ env.CLOUD_RUN_SERVICE_NAME }} \
               --region ${{ env.GCP_REGION }} \
               --project ${{ env.GCP_PROJECT_ID }} \
               --image=${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_AR_NAME }}/${{ env.REPOSITORY_FULL_NAME }}:${{ env.REPOSITORY_COMMIT_SHA }} \
