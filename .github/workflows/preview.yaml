@@ -11,10 +11,10 @@ jobs:
     name: Preview
     runs-on: ubuntu-latest
     env:
-      GCP_PROJECT_ID: ${{ var.GCP_PROJECT_ID }}
-      GCP_REGION: ${{ var.GCP_REGION }}
-      GCP_SERVICE_ACCOUNT: ${{ var.GCP_SERVICE_ACCOUNT }}
-      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ var.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
     steps:
       - name: Check out repository
         id: checkout
