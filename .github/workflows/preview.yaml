@@ -9,12 +9,19 @@ on:
 jobs:
   preview:
     name: Preview
+
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: "read"
+      id-token: "write"
+
     env:
       GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
       GCP_REGION: ${{ vars.GCP_REGION }}
       GCP_SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+
     steps:
       - name: Check out repository
         id: checkout
